@@ -1,12 +1,14 @@
 package br.com.biblioteca.publica.service;
 
 import br.com.biblioteca.publica.dto.request.AlunoRequest;
+import br.com.biblioteca.publica.dto.request.AlunoUpdateRequest;
 import br.com.biblioteca.publica.dto.response.AlunoResponse;
 import br.com.biblioteca.publica.entity.Aluno;
 import br.com.biblioteca.publica.entity.Escola;
 import br.com.biblioteca.publica.enums.PerfilEnum;
 import br.com.biblioteca.publica.repository.AlunoRepository;
 import br.com.biblioteca.publica.repository.EscolaRepository;
+import br.com.biblioteca.publica.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ public class AlunoService {
 
     private final AlunoRepository alunoRepository;
     private final EscolaRepository escolaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public List<AlunoResponse> listarTodos() {
         return alunoRepository.findAll().stream()
@@ -39,6 +42,9 @@ public class AlunoService {
         if (alunoRepository.existsByMatricula(request.matricula())) {
             throw new RuntimeException("Matrícula já cadastrada: " + request.matricula());
         }
+        if (usuarioRepository.existsByEmail(request.email())) {
+            throw new RuntimeException("E-mail já cadastrado: " + request.email());
+        }
         Escola escola = escolaRepository.findById(request.escolaId())
                 .orElseThrow(() -> new RuntimeException("Escola não encontrada: " + request.escolaId()));
 
@@ -54,7 +60,31 @@ public class AlunoService {
         return AlunoResponse.from(alunoRepository.save(aluno));
     }
 
+    public AlunoResponse atualizar(Long id, AlunoUpdateRequest request) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado: " + id));
+
+        aluno.setNome(request.nome());
+        aluno.setEmail(request.email());
+
+        // Só atualiza senha se foi enviada
+        if (request.senha() != null && !request.senha().isBlank()) {
+            aluno.setSenha(request.senha());
+        }
+
+        if (request.escolaId() != null) {
+            Escola escola = escolaRepository.findById(request.escolaId())
+                    .orElseThrow(() -> new RuntimeException("Escola não encontrada: " + request.escolaId()));
+            aluno.setEscola(escola);
+        }
+
+        return AlunoResponse.from(alunoRepository.save(aluno));
+    }
+
     public void deletar(Long id) {
+        if (!alunoRepository.existsById(id)) {
+            throw new RuntimeException("Aluno não encontrado: " + id);
+        }
         alunoRepository.deleteById(id);
     }
 }

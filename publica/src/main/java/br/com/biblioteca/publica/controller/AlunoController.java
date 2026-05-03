@@ -1,6 +1,7 @@
 package br.com.biblioteca.publica.controller;
 
 import br.com.biblioteca.publica.dto.request.AlunoRequest;
+import br.com.biblioteca.publica.dto.request.AlunoUpdateRequest;
 import br.com.biblioteca.publica.dto.response.AlunoResponse;
 import br.com.biblioteca.publica.service.AlunoService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,13 @@ public class AlunoController {
     @PostMapping
     public ResponseEntity<AlunoResponse> criar(@RequestBody AlunoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(alunoService.criar(request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AlunoResponse> atualizar(
+            @PathVariable Long id,
+            @RequestBody AlunoUpdateRequest request) {
+        return ResponseEntity.ok(alunoService.atualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
