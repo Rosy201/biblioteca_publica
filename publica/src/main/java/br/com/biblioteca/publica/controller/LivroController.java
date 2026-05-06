@@ -48,4 +48,9 @@ public class LivroController {
         livroService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/importar")
+    public ResponseEntity<LivroResponse> importar(@RequestParam String titulo) {
+        return ResponseEntity.ok(livroService.importarLivroPeloTitulo(titulo));
+    }
 }
