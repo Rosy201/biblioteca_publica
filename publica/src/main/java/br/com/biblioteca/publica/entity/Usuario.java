@@ -31,6 +31,10 @@ public abstract class Usuario {
     @Column(nullable = false, length = 30)
     private PerfilEnum perfil;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "escola_id")
+    private Escola escola;
+
     public boolean login(String email, String senha) {
         return this.email.equals(email) && this.senha.equals(senha);
     }
