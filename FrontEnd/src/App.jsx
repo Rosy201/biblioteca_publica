@@ -17,7 +17,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
 
-            {/* Apenas Logados (Alunos e Supervisores) */}
+            {/* Apenas logados (Alunos e Supervisores) */}
             <Route path="/acervo" element={
               <ProtectedRoute>
                 <CollectionManagement />

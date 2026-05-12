@@ -2,7 +2,7 @@ package br.com.biblioteca.publica.controller;
 
 import br.com.biblioteca.publica.dto.response.UsuarioResumoResponse;
 import br.com.biblioteca.publica.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,21 +11,24 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String login = body.get("login");
+        String email = body.get("email");
         String senha = body.get("senha");
 
-        return usuarioRepository.findByLogin(login)
+        if (email == null || senha == null) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Email e senha são obrigatórios."));
+        }
+
+        return usuarioRepository.findByEmail(email)
                 .filter(u -> u.getSenha().equals(senha))
-                // AQUI ESTAVA O ERRO: Use o método .from(u) que já mapeia todos os campos
-                .map(u -> ResponseEntity.ok(UsuarioResumoResponse.from(u)))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                .map(u -> ResponseEntity.ok((Object) UsuarioResumoResponse.from(u)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("erro", "E-mail ou senha inválidos.")));
     }
 }

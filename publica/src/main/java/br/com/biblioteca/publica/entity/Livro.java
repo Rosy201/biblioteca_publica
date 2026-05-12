@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "livro")
+@Table(name = "livros")
 @Getter
 @Setter
 @Builder
@@ -25,6 +25,6 @@ public class Livro {
     private CategoriaEnum categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "escola_id", nullable = false)
+    @JoinColumn(name = "escola_id")
     private Escola escola;
 }
