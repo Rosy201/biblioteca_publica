@@ -24,5 +24,13 @@ public class GoogleBooksResponse {
         private List<String> authors;
         private String description;
         private int pageCount;
+        private ImageLinks imageLinks;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ImageLinks {
+        private String thumbnail;
+        private String smallThumbnail;
     }
 }
