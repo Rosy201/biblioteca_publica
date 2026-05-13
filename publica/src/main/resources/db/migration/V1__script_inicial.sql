@@ -10,16 +10,19 @@ CREATE TABLE livros (
     titulo VARCHAR(255) NOT NULL,
     autor VARCHAR(255),
     url_conteudo VARCHAR(500),
-    categoria VARCHAR(50) NOT NULL
+    categoria VARCHAR(50) NOT NULL,
+    escola_id BIGINT,
+    CONSTRAINT fk_livro_escola FOREIGN KEY (escola_id) REFERENCES escolas(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
-
 
 CREATE TABLE usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    perfil VARCHAR(30) NOT NULL
+    perfil VARCHAR(30) NOT NULL,
+    escola_id BIGINT NULL,
+    CONSTRAINT fk_usuario_escola FOREIGN KEY (escola_id) REFERENCES escolas(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 

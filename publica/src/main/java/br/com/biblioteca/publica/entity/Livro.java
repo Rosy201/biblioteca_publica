@@ -6,25 +6,25 @@ import lombok.*;
 
 @Entity
 @Table(name = "livros")
-@Getter @Setter
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Livro {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String titulo;
-
     private String autor;
-
-    @Column(name = "url_conteudo", length = 500)
     private String urlConteudo;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private CategoriaEnum categoria;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "escola_id")
+    private Escola escola;
 }

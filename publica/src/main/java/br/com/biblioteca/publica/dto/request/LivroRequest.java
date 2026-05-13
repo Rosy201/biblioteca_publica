@@ -6,5 +6,6 @@ public record LivroRequest(
         String titulo,
         String autor,
         String urlConteudo,
-        CategoriaEnum categoria
+        CategoriaEnum categoria,
+        Long escolaId
 ) {}
