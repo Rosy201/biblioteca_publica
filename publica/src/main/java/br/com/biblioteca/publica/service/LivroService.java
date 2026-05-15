@@ -99,7 +99,6 @@ public class LivroService {
                         ? info.getAuthors().get(0)
                         : "Autor Desconhecido")
                 .categoria(CategoriaEnum.OUTROS)
-                // Usando o ID do Google para montar uma URL de visualização
                 .urlConteudo("https://books.google.com.br/books?id=" + item.getId())
                 .build();
 
