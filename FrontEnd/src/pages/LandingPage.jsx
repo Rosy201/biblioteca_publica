@@ -1,23 +1,29 @@
 import React from 'react';
+import { BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom'; // Se estiver usando rotas
 
-export default function LandingPage() {
+export default function Header() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">
-      <h1 className="text-5xl font-extrabold text-slate-800 mb-6">
-        A leitura ao alcance de <br />
-        <span className="bg-gradient-to-r from-[#0066ff] to-[#3b82f6] bg-clip-text text-transparent">todos os alunos.</span>
-      </h1>
-      <p className="text-lg text-slate-600 max-w-2xl mb-8">
-        Gestão moderna e intuitiva para o acervo da sua escola. Organize livros, usuários e empréstimos em um só lugar.
-      </p>
-      <div className="flex gap-4">
-        <button className="px-8 py-3 bg-gradient-to-r from-[#0066ff] to-[#3b82f6] text-white rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
-          Explorar Acervo
-        </button>
-        <button className="px-8 py-3 border-2 border-slate-200 text-slate-600 rounded-full font-bold hover:bg-slate-50 transition-colors">
-          Saiba Mais
-        </button>
-      </div>
-    </main>
+    <header className="relative z-10 w-full">
+      <nav className="flex items-center justify-between px-12 py-6 max-w-7xl mx-auto">
+
+        <div className="flex items-center gap-2">
+          <div className="bg-gradient-to-br from-blue-500 to-cyan-400 p-1.5 rounded-lg">
+            <BookOpen className="text-white w-5 h-5" />
+          </div>
+          <span className="text-xl font-bold text-slate-900">Biblioteca Pública</span>
+        </div>
+        
+        {/* Actions Section */}
+        <div className="flex items-center gap-8">
+          <button className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">
+            Entrar
+          </button>
+          <button className="bg-gradient-to-r from-blue-600 to-cyan-400 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-200 hover:opacity-90 transition-opacity">
+            Cadastrar
+          </button>
+        </div>
+      </nav>
+    </header>
   );
 }
