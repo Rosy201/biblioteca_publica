@@ -2,6 +2,7 @@ package br.com.biblioteca.publica.service;
 
 import br.com.biblioteca.publica.dto.request.LivroRequest;
 import br.com.biblioteca.publica.dto.response.LivroResponse;
+import br.com.biblioteca.publica.entity.Api.GoogleBooks.GoogleBooksResponse;
 import br.com.biblioteca.publica.entity.Escola;
 import br.com.biblioteca.publica.entity.Livro;
 import br.com.biblioteca.publica.enums.CategoriaEnum;
@@ -19,6 +20,7 @@ public class LivroService {
 
     private final LivroRepository livroRepository;
     private final EscolaRepository escolaRepository;
+    private final GoogleBooksService googleBooksService;
 
     public List<LivroResponse> listarTodos() {
         return livroRepository.findAll().stream()
@@ -46,7 +48,7 @@ public class LivroService {
                 .autor(request.autor())
                 .urlConteudo(request.urlConteudo())
                 .categoria(request.categoria())
-                .escola(escola) // Atribui o objeto Escola completo
+                .escola(escola)
                 .build();
 
         return LivroResponse.from(livroRepository.save(livro));
@@ -76,5 +78,33 @@ public class LivroService {
             throw new RuntimeException("Livro não encontrado para exclusão.");
         }
         livroRepository.deleteById(id);
+    }
+
+    @Transactional
+    public LivroResponse importarLivroPeloTitulo(String titulo) {
+
+        GoogleBooksResponse response = googleBooksService.buscarPorTitulo(titulo);
+
+        if (response.getItems() == null || response.getItems().isEmpty()) {
+            throw new RuntimeException("Nenhum livro encontrado no Google para o título: " + titulo);
+        }
+
+        var item = response.getItems().get(0);
+        var info = item.getVolumeInfo();
+
+
+        Livro novoLivro = Livro.builder()
+                .titulo(info.getTitle())
+                .autor(info.getAuthors() != null && !info.getAuthors().isEmpty()
+                        ? info.getAuthors().get(0)
+                        : "Autor Desconhecido")
+                .categoria(CategoriaEnum.OUTROS)
+                // Usando o ID do Google para montar uma URL de visualização
+                .urlConteudo("https://books.google.com.br/books?id=" + item.getId())
+                .build();
+
+
+        Livro livroSalvo = livroRepository.save(novoLivro);
+        return LivroResponse.from(livroSalvo);
     }
 }
