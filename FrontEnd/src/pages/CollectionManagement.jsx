@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
 import api from '../services/Api'; // CORRIGIDO: era '../services/api' (minúsculo — falha em Linux)
 import { AuthContext } from '../contexts/AuthContext';
@@ -46,9 +47,9 @@ function LivroModal({ livro, escolaId, onClose, onSaved }) {
     setError('');
     try {
       if (isEdicao) {
-        await api.put(`/api/livros/${livro.id}`, form);
+        await api.put(`/livros/${livro.id}`, form);
       } else {
-        await api.post('/api/livros', form);
+        await api.post('/livros', form);
       }
       onSaved();
       onClose();
@@ -127,6 +128,7 @@ function LivroModal({ livro, escolaId, onClose, onSaved }) {
 
 // ----- Página principal -----
 export default function CollectionManagement() {
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const isSupervisor = user?.perfil === 'SUPERVISOR';
 
@@ -142,7 +144,7 @@ export default function CollectionManagement() {
   const loadBooks = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/livros');
+      const response = await api.get('/livros');
       setLivros(response.data);
     } catch {
       setError('Não foi possível carregar o acervo.');
@@ -157,7 +159,7 @@ export default function CollectionManagement() {
     if (!window.confirm('Tem certeza que deseja remover este livro?')) return;
     setDeletando(id);
     try {
-      await api.delete(`/api/livros/${id}`);
+      await api.delete(`/livros/${id}`);
       setLivros(prev => prev.filter(l => l.id !== id));
     } catch {
       alert('Erro ao remover livro.');
@@ -274,9 +276,10 @@ export default function CollectionManagement() {
 
                 {/* Botões */}
                 <div className="flex gap-2 pt-1">
-                  {livro.urlConteudo ? (
+                {livro.urlConteudo ? (
                     <button
-                      onClick={() => window.open(livro.urlConteudo, '_blank')}
+                      // A mágica acontece aqui: mudamos de window.open para navigate!
+                      onClick={() => navigate(`/leitura/${livro.id}`)}
                       className="flex-1 py-2 bg-slate-800 text-white rounded-lg text-xs font-semibold hover:bg-slate-900 transition-colors"
                     >
                       {isSupervisor ? 'Visualizar' : 'Ler Agora'}

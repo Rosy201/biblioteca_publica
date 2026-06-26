@@ -24,9 +24,9 @@ function AlunoModal({ aluno, onClose, onSaved }) {
       const payload = { ...form };
       if (isEdicao && !payload.senha) delete payload.senha; // não envia senha vazia em edição
       if (isEdicao) {
-        await api.put(`/api/alunos/${aluno.id}`, payload);
+        await api.put(`/alunos/${aluno.id}`, payload);
       } else {
-        await api.post('/api/alunos', payload);
+        await api.post('/alunos', payload);
       }
       onSaved();
       onClose();
@@ -120,7 +120,7 @@ export default function UserManagement() {
   const loadUsuarios = async () => {
     try {
       setLoading(true);
-      const url = filtroPerfi ? `/api/usuarios?perfil=${filtroPerfi}` : '/api/usuarios';
+      const url = filtroPerfi ? `/usuarios?perfil=${filtroPerfi}` : '/usuarios';
       const res = await api.get(url);
       setUsuarios(res.data);
     } catch {
@@ -136,7 +136,7 @@ export default function UserManagement() {
     if (!window.confirm(`Remover o aluno "${aluno.nome}"? Esta ação é irreversível.`)) return;
     setDeletando(aluno.id);
     try {
-      await api.delete(`/api/alunos/${aluno.id}`);
+      await api.delete(`/alunos/${aluno.id}`);
       setUsuarios(prev => prev.filter(u => u.id !== aluno.id));
     } catch {
       alert('Erro ao remover aluno.');

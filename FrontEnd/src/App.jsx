@@ -5,6 +5,7 @@ import Header from './components/Header';
 import LandingPage from './pages/LandingPage';
 import UserManagement from './pages/UserManagement';
 import CollectionManagement from './pages/CollectionManagement';
+import LeituraPage from './pages/LeituraPage';
 import Login from './pages/Login';
 
 function App() {
@@ -28,6 +29,12 @@ function App() {
             <Route path="/usuarios" element={
               <ProtectedRoute roleRequired="SUPERVISOR">
                 <UserManagement />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/leitura/:livroId" element={
+              <ProtectedRoute>
+                <LeituraPage />
               </ProtectedRoute>
             } />
           </Routes>
