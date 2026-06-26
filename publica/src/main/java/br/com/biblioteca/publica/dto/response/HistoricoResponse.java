@@ -5,16 +5,24 @@ import java.time.LocalDateTime;
 
 public record HistoricoResponse(
         Long id,
-        String tituloLivro,
-        String nomeAluno,
-        int progressoPagina,
+        Integer progressoPagina,
         LocalDateTime dataAcesso,
-        boolean concluido
+        Boolean concluido,
+        Long alunoId,
+        String alunoNome,
+        Long livroId,
+        String livroTitulo
 ) {
-    public static HistoricoResponse from(HistoricoLeitura h) {
+    public static HistoricoResponse from(HistoricoLeitura historico) {
         return new HistoricoResponse(
-                h.getId(), h.getLivro().getTitulo(), h.getAluno().getNome(),
-                h.getProgressoPagina(), h.getDataAcesso(), h.isConcluido()
+                historico.getId(),
+                historico.getProgressoPagina(),
+                historico.getDataAcesso(),
+                historico.getConcluido(),
+                historico.getAluno().getId(),
+                historico.getAluno().getNome(), // Assumindo que a entidade Aluno tenha "getNome()"
+                historico.getLivro().getId(),
+                historico.getLivro().getTitulo()
         );
     }
 }

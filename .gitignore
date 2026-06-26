@@ -22,3 +22,17 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Pastas de IDE e Sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Pastas de Build e Dependências
+target/
+build/
+bin/
+out/
+.mvn/wrapper/maven-wrapper.jar

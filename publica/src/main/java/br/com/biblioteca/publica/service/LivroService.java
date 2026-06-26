@@ -11,6 +11,7 @@ import br.com.biblioteca.publica.repository.LivroRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -92,7 +93,12 @@ public class LivroService {
         var item = response.getItems().get(0);
         var info = item.getVolumeInfo();
 
-
+        // <-- INÍCIO DA INSERÇÃO: Verificação de registro duplicado no banco 
+        Optional<Livro> livroExistente = livroRepository.findByTituloIgnoreCase(info.getTitle());
+        if (livroExistente.isPresent()) {
+            return LivroResponse.from(livroExistente.get()); // Retorna imediatamente o livro já cadastrado 
+        }
+        // --> FIM DA INSERÇÃO: Verificação de registro duplicado no banco
         Livro novoLivro = Livro.builder()
                 .titulo(info.getTitle())
                 .autor(info.getAuthors() != null && !info.getAuthors().isEmpty()
@@ -101,7 +107,6 @@ public class LivroService {
                 .categoria(CategoriaEnum.OUTROS)
                 .urlConteudo("https://books.google.com.br/books?id=" + item.getId())
                 .build();
-
 
         Livro livroSalvo = livroRepository.save(novoLivro);
         return LivroResponse.from(livroSalvo);

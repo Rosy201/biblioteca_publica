@@ -2,7 +2,7 @@ package br.com.biblioteca.publica.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -18,11 +18,11 @@ public class MarcadorPagina {
     private Long id;
 
     @Column(nullable = false)
-    private int posicao;
+    private Integer posicao;
 
-    @Column(name = "data_criacao")
-    @Builder.Default
-    private LocalDate dataCriacao = LocalDate.now();
+    @CreationTimestamp // Deixa o ciclo de vida do JPA cuidar da data
+    @Column(name = "data_criacao", nullable = false, updatable = false)
+    private LocalDate dataCriacao;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "historico_id", nullable = false, unique = true)

@@ -2,12 +2,12 @@ package br.com.biblioteca.publica.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "historicos_leitura")
-@Getter @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -17,16 +17,17 @@ public class HistoricoLeitura {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "progresso_pagina")
+    @Column(name = "progresso_pagina", nullable = false)
     @Builder.Default
-    private int progressoPagina = 0;
+    private Integer progressoPagina = 0;
 
-    @Column(name = "data_acesso")
-    @Builder.Default
-    private LocalDateTime dataAcesso = LocalDateTime.now();
+    @UpdateTimestamp // <-- O Hibernate gerencia automaticamente a cada inserção/atualização
+    @Column(name = "data_acesso", nullable = false)
+    private LocalDateTime dataAcesso;
 
+    @Column(nullable = false)
     @Builder.Default
-    private boolean concluido = false;
+    private Boolean concluido = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aluno_id", nullable = false)
@@ -39,8 +40,9 @@ public class HistoricoLeitura {
     @OneToOne(mappedBy = "historico", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private MarcadorPagina marcador;
 
+    // Regra de negócio encapsulada na entidade (Rich Domain Model)
     public void atualizarProgresso(int pagina) {
         this.progressoPagina = pagina;
-        this.dataAcesso = LocalDateTime.now();
+        // Não precisa mais setar o LocalDateTime.now() manualmente aqui, o @UpdateTimestamp resolve!
     }
 }

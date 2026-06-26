@@ -10,6 +10,7 @@ import br.com.biblioteca.publica.repository.HistoricoLeituraRepository;
 import br.com.biblioteca.publica.repository.LivroRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,35 +22,48 @@ public class HistoricoLeituraService {
     private final AlunoRepository alunoRepository;
     private final LivroRepository livroRepository;
 
+    // Método para o GET: Lista todos os históricos de um aluno
+    @Transactional(readOnly = true)
     public List<HistoricoResponse> listarPorAluno(Long alunoId) {
         return historicoRepository.findByAlunoId(alunoId).stream()
-                .map(HistoricoResponse::from).toList();
+                .map(HistoricoResponse::from)
+                .toList();
     }
 
-    public HistoricoResponse iniciarLeitura(HistoricoLeituraRequest request) {
-        Aluno aluno = alunoRepository.findById(request.alunoId())
-                .orElseThrow(() -> new RuntimeException("Aluno não encontrado: " + request.alunoId()));
-        Livro livro = livroRepository.findById(request.livroId())
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado: " + request.livroId()));
+    // Método para o POST (Upsert): Inicia leitura ou atualiza a página
+    @Transactional
+    public HistoricoResponse registrarProgresso(HistoricoLeituraRequest request) {
+        HistoricoLeitura historico = historicoRepository
+                .findByAlunoIdAndLivroId(request.alunoId(), request.livroId())
+                .orElseGet(() -> criarNovoHistorico(request.alunoId(), request.livroId()));
 
-        HistoricoLeitura historico = HistoricoLeitura.builder()
+        historico.atualizarProgresso(request.paginaAtual());
+
+        return HistoricoResponse.from(historicoRepository.save(historico));
+    }
+
+    // Método para o PATCH: Marca o livro como concluído
+    @Transactional
+    public HistoricoResponse concluirLeitura(Long id) {
+        HistoricoLeitura historico = historicoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Histórico de leitura não encontrado: " + id));
+
+        historico.setConcluido(true); // Se você usou primitivo (boolean) na entidade, é setConcluido(true)
+
+        return HistoricoResponse.from(historicoRepository.save(historico));
+    }
+
+    // Método auxiliar privado
+    private HistoricoLeitura criarNovoHistorico(Long alunoId, Long livroId) {
+        Aluno aluno = alunoRepository.findById(alunoId)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado: " + alunoId));
+        Livro livro = livroRepository.findById(livroId)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado: " + livroId));
+
+        HistoricoLeitura build = HistoricoLeitura.builder()
                 .aluno(aluno)
                 .livro(livro)
                 .build();
-        return HistoricoResponse.from(historicoRepository.save(historico));
-    }
-
-    public HistoricoResponse atualizarProgresso(Long id, int pagina) {
-        HistoricoLeitura historico = historicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Histórico não encontrado: " + id));
-        historico.atualizarProgresso(pagina);
-        return HistoricoResponse.from(historicoRepository.save(historico));
-    }
-
-    public HistoricoResponse concluirLeitura(Long id) {
-        HistoricoLeitura historico = historicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Histórico não encontrado: " + id));
-        historico.setConcluido(true);
-        return HistoricoResponse.from(historicoRepository.save(historico));
+        return build;
     }
 }
