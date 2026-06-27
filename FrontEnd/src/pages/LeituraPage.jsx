@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/Api';
-import BookReader from '../components/BookReader'; // Ajuste o caminho se necessário
+import BookReader from '../components/BookReader';
+import { AuthContext } from '../contexts/AuthContext';
 
 const LeituraPage = () => {
     // Pega o ID do livro direto da URL (ex: /leitura/10)
@@ -12,9 +13,8 @@ const LeituraPage = () => {
     const [paginaInicial, setPaginaInicial] = useState(0);
     const [loading, setLoading] = useState(true);
 
-    // TODO: Em produção, este ID virá do seu AuthContext ou localStorage após o login.
-    // Para testarmos agora, vamos deixar fixo o aluno 1 que criámos ontem.
-    const alunoId = 1; 
+    const { user } = useContext(AuthContext);
+    const alunoId = user?.id || 1;
 
     useEffect(() => {
         const carregarDadosLeitura = async () => {

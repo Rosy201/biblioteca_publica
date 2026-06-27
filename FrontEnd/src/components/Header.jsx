@@ -21,13 +21,26 @@ export default function Header() {
       </Link>
 
       <nav className="flex items-center gap-6 text-slate-600 font-medium text-sm">
-        <Link to="/" className="hover:text-[#0066ff] transition-colors">Início</Link>
+        <Link to="/" className="hover:text-[#0066ff] transition-colors">
+          Início
+        </Link>
 
         {signed && (
           <>
-            <Link to="/acervo" className="hover:text-[#0066ff] transition-colors">Acervo</Link>
+            <Link to="/acervo" className="hover:text-[#0066ff] transition-colors">
+              Acervo
+            </Link>
+
             {user?.perfil === 'SUPERVISOR' && (
-              <Link to="/usuarios" className="hover:text-[#0066ff] transition-colors">Usuários</Link>
+              <>
+                <Link to="/usuarios" className="hover:text-[#0066ff] transition-colors">
+                  Usuários
+                </Link>
+
+                <Link to="/dashboard" className="hover:text-[#0066ff] transition-colors">
+                  Dashboard
+                </Link>
+              </>
             )}
           </>
         )}
@@ -38,11 +51,16 @@ export default function Header() {
               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#0066ff] to-[#6366f1] flex items-center justify-center text-white text-xs font-bold">
                 {user?.nome?.charAt(0)?.toUpperCase()}
               </div>
-              <span className="text-sm text-slate-600">{user?.nome}</span>
+
+              <span className="text-sm text-slate-600">
+                {user?.nome}
+              </span>
+
               <span className="text-[10px] font-bold px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full uppercase">
                 {user?.perfil}
               </span>
             </div>
+
             <button
               onClick={handleLogout}
               className="text-sm text-red-500 hover:text-red-700 transition-colors font-medium"

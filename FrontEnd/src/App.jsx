@@ -7,6 +7,7 @@ import UserManagement from './pages/UserManagement';
 import CollectionManagement from './pages/CollectionManagement';
 import LeituraPage from './pages/LeituraPage';
 import Login from './pages/Login';
+import DashboardAdmin from './components/DashboardAdmin';
 
 function App() {
   return (
@@ -14,29 +15,50 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#eff6ff] to-[#fefce8]">
           <Header />
+
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
 
-            {/* Apenas logados (Alunos e Supervisores) */}
-            <Route path="/acervo" element={
-              <ProtectedRoute>
-                <CollectionManagement />
-              </ProtectedRoute>
-            } />
+            {/* Logados: alunos, supervisores e administradores */}
+            <Route
+              path="/acervo"
+              element={
+                <ProtectedRoute>
+                  <CollectionManagement />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Apenas Supervisores */}
-            <Route path="/usuarios" element={
-              <ProtectedRoute roleRequired="SUPERVISOR">
-                <UserManagement />
-              </ProtectedRoute>
-            } />
+            {/* Supervisores */}
+            <Route
+              path="/usuarios"
+              element={
+                <ProtectedRoute roleRequired="SUPERVISOR">
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
 
-            <Route path="/leitura/:livroId" element={
-              <ProtectedRoute>
-                <LeituraPage />
-              </ProtectedRoute>
-            } />
+            {/* Supervisores */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute roleRequired="SUPERVISOR">
+                  <DashboardAdmin />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Logados */}
+            <Route
+              path="/leitura/:livroId"
+              element={
+                <ProtectedRoute>
+                  <LeituraPage />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
       </Router>

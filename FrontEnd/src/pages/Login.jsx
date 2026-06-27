@@ -20,8 +20,11 @@ export default function Login() {
       await login({ email, senha });
       navigate('/acervo');
     } catch (err) {
-      const msg = err?.response?.data?.erro || 'E-mail ou senha inválidos.';
-      setError(msg);
+      const msg =
+        err?.usuarioMessage ||
+        err?.response?.data?.erro ||
+        'E-mail ou senha inválidos.';
+        setError(msg);
     } finally {
       setLoading(false);
     }
