@@ -5,10 +5,7 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
     const viewerRef = useRef(null);
     const viewerInstanceRef = useRef(null);
 
-    const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
-    const [viewerStatus, setViewerStatus] = useState('loading'); 
-    // loading | ready | error
-
+    const [viewerStatus, setViewerStatus] = useState('loading'); // loading | ready | error
     const [paginaAtual, setPaginaAtual] = useState(Number(paginaInicial) || 1);
     const [historicoId, setHistoricoId] = useState(null);
 
@@ -45,11 +42,8 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
 
             if (!Number.isNaN(page) && page > 0) {
                 setPaginaAtual(page);
-                return page;
             }
         }
-
-        return Number(paginaAtual) || 1;
     };
 
     const salvarProgresso = async ({ silent = false } = {}) => {
@@ -84,10 +78,7 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
             }
 
             if (!silent) {
-                showFeedback(
-                    'success',
-                    `Progresso salvo na página ${page}.`
-                );
+                showFeedback('success', `Progresso salvo na página ${page}.`);
             }
 
             return response.data;
@@ -96,6 +87,7 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
 
             if (!silent) {
                 const message =
+                    error.usuarioMessage ||
                     error.response?.data?.message ||
                     error.response?.data?.erro ||
                     'Não foi possível salvar o progresso. Verifique a conexão e tente novamente.';
@@ -141,14 +133,12 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
                 posicao: page
             });
 
-            showFeedback(
-                'success',
-                `Marcador salvo na página ${page}.`
-            );
+            showFeedback('success', `Marcador salvo na página ${page}.`);
         } catch (error) {
             console.error('Erro ao salvar marcador:', error);
 
             const message =
+                error.usuarioMessage ||
                 error.response?.data?.message ||
                 error.response?.data?.erro ||
                 'Não foi possível salvar o marcador. Tente novamente.';
@@ -160,90 +150,89 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
     };
 
     useEffect(() => {
-        const initialPage = Number(paginaInicial) || 1;
-        setPaginaAtual(initialPage);
+        setPaginaAtual(Number(paginaInicial) || 1);
     }, [paginaInicial]);
 
     useEffect(() => {
-        if (!window.google) {
-            const script = document.createElement('script');
-            script.src = 'https://www.google.com/books/jsapi.js';
-
-            script.onload = () => {
-                window.google.books.load();
-                window.google.books.setOnLoadCallback(() => {
-                    setIsGoogleLoaded(true);
-                });
-            };
-
-            script.onerror = () => {
-                setViewerStatus('error');
-                showFeedback(
-                    'error',
-                    'Não foi possível carregar o leitor do Google Books.'
-                );
-            };
-
-            document.head.appendChild(script);
-        } else {
-            setIsGoogleLoaded(true);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!isGoogleLoaded) return;
-
         if (!googleVolumeId) {
             setViewerStatus('error');
             return;
         }
 
-        if (!viewerRef.current) return;
+        const carregarGoogleBooks = () => {
+            try {
+                setViewerStatus('loading');
 
-        try {
-            setViewerStatus('loading');
-
-            const viewer = new window.google.books.DefaultViewer(viewerRef.current);
-            viewerInstanceRef.current = viewer;
-
-            viewer.load(
-                googleVolumeId,
-
-                // Falha ao carregar livro.
-                () => {
-                    setViewerStatus('error');
-                    showFeedback(
-                        'error',
-                        'Este livro não está disponível para leitura integrada pelo Google Books.'
-                    );
-                },
-
-                // Livro carregado.
-                () => {
-                    const initialPage = Number(paginaInicial) || 1;
-
-                    if (initialPage > 1 && typeof viewer.goToPage === 'function') {
-                        viewer.goToPage(initialPage);
-                    }
-
+                const timeoutId = window.setTimeout(() => {
                     setViewerStatus('ready');
+                }, 5000);
 
-                    // Captura uma vez, mas depois deixa o usuário editar manualmente.
-                    window.setTimeout(() => {
-                        capturarPaginaDoGoogleUmaVez();
-                    }, 1000);
-                }
-            );
-        } catch (error) {
-            console.error('Erro ao inicializar Google Books Viewer:', error);
+                const viewer = new window.google.books.DefaultViewer(viewerRef.current);
+                viewerInstanceRef.current = viewer;
 
+                viewer.load(
+                    googleVolumeId,
+
+                    () => {
+                        window.clearTimeout(timeoutId);
+                        setViewerStatus('error');
+
+                        showFeedback(
+                            'error',
+                            'Este livro não está disponível para leitura integrada pelo Google Books.'
+                        );
+                    },
+
+                    () => {
+                        window.clearTimeout(timeoutId);
+
+                        const initialPage = Number(paginaInicial) || 1;
+
+                        if (initialPage > 1 && typeof viewer.goToPage === 'function') {
+                            viewer.goToPage(initialPage);
+                        }
+
+                        setViewerStatus('ready');
+
+                        window.setTimeout(() => {
+                            capturarPaginaDoGoogleUmaVez();
+                        }, 1000);
+                    }
+                );
+            } catch (error) {
+                console.error('Erro ao inicializar Google Books Viewer:', error);
+
+                setViewerStatus('error');
+                showFeedback(
+                    'error',
+                    'O leitor não pôde ser inicializado. Use o registro manual de página.'
+                );
+            }
+        };
+
+        if (window.google?.books) {
+            carregarGoogleBooks();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://www.google.com/books/jsapi.js';
+
+        script.onload = () => {
+            window.google.books.load();
+            window.google.books.setOnLoadCallback(carregarGoogleBooks);
+        };
+
+        script.onerror = () => {
             setViewerStatus('error');
             showFeedback(
                 'error',
-                'O leitor não pôde ser inicializado. Use o registro manual de página.'
+                'Não foi possível carregar o leitor do Google Books.'
             );
-        }
-    }, [isGoogleLoaded, googleVolumeId, paginaInicial]);
+        };
+
+        document.head.appendChild(script);
+    }, [googleVolumeId, paginaInicial]);
 
     useEffect(() => {
         const salvarAntesDeSair = () => {
@@ -256,6 +245,7 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
             window.removeEventListener('beforeunload', salvarAntesDeSair);
             salvarProgresso({ silent: true });
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -288,7 +278,7 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
                         />
 
                         <span className="text-xs text-gray-500">
-                            Campo manual. O sistema salvará exatamente o valor informado aqui.
+                            O sistema salvará exatamente o valor informado aqui.
                         </span>
                     </div>
 
@@ -336,9 +326,9 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
                     </div>
                 )}
 
-                <div className="w-full min-h-[600px] rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+                <div className="w-full min-h-[600px] rounded-lg border border-gray-200 bg-gray-50 overflow-hidden relative">
                     {viewerStatus === 'loading' && (
-                        <div className="h-[600px] flex items-center justify-center">
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-50">
                             <p className="text-gray-500 animate-pulse">
                                 Carregando leitor...
                             </p>
@@ -385,16 +375,16 @@ const BookReader = ({ alunoId, livro, paginaInicial }) => {
                         ref={viewerRef}
                         style={{
                             width: '100%',
-                            height: viewerStatus === 'ready' ? '600px' : 0,
-                            overflow: 'hidden'
+                            height: viewerStatus === 'error' ? 0 : '600px',
+                            overflow: 'hidden',
+                            visibility: viewerStatus === 'error' ? 'hidden' : 'visible'
                         }}
                     />
                 </div>
-            </div>
-            
-            <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
                     A página registrada é uma referência de progresso. Se o Google Books não contar corretamente, informe a página manualmente antes de salvar.
-            </div>
+                </div>   
+            </div>         
         </div>
     );
 };

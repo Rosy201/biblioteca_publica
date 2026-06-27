@@ -54,7 +54,7 @@ function App() {
             <Route
               path="/leitura/:livroId"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute roleRequired="ALUNO">
                   <LeituraPage />
                 </ProtectedRoute>
               }
